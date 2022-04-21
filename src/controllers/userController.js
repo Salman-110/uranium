@@ -63,15 +63,17 @@ const createUser= async function (req,res) {
 
 const purchaseOrder= async function (req,res) {
     let data= req.body
-    let userId= req.body.userId
-    let productId= req.body.productId
+    let userId= data.userId
+    let productId= data.productId
+    let user= await userModel2.findById(userId)
+    console.log(user)
     if(!userId || !productId){
         return res.status(422).send({msg:"user or Product details is required"});
 }
 // Validation A
   if(!userId) return res.send('The request is not Valid as the user details are required')
 // Validation B
-let user = await userModel2.findById(userId)
+
 if(!user) return res.send('The request is not Valid as no user is present with the given userId.')
 // Validdation C
 if(!productId) return res.send('the request is not valid as the product details are required')
@@ -79,13 +81,14 @@ if(!productId) return res.send('the request is not valid as the product details 
 let product=await productModel.findById(productId)
 if(!product) return res.send('the request is not valid as no product is present with the given productId')
 }
-   let isfreeappuser= req.header["isfreeappuser"]
-   if(isfreeappuser== 'false'){
+   let isFreeAppUser= req.headers["isfreeappuser"]
+   if(isFreeAppUser== 'false'){
 
     if(product.price < user.balance){
-        userModel2.updateMany({user:{$eq:user_id}},{$inc:{balance: -product.price}},{new:true})
-        let userData= req.body;
-        userData.isfreeappuser=["isfreeappuser"];
+        let finalValue= user.balance - product.price
+        userModel2.updateMany({user:user._id},{balance:  finalValue })
+        let userData= req.body
+        userData.isfreeapuser== "false"
         userData.amount=product.price;
        
 
@@ -97,9 +100,10 @@ if(!product) return res.send('the request is not valid as no product is present 
     }
 
 
-    }else{
+    }
+    else if (isFreeAppUser== 'true') {
         let userDataF= req.body;
-        userDataF.isfreeappuser=["isfreeappuser"];
+        userDataF.isfreeapuser==isfreeappuser
         userDataF.amount=0;
         
 
@@ -107,9 +111,6 @@ if(!product) return res.send('the request is not valid as no product is present 
         res.send({status:savedProduct})
     }
    
-
-
-
 
 module.exports.createAUser = createAUser
 module.exports.basicCode = basicCode
@@ -143,6 +144,6 @@ module.exports.purchaseOrder=purchaseOrder
 //     res.send({msg: allUsers})
 // }
 
-// module.exports.createUser= createUser
+// module.exports.createUser= createUser    
 // module.exports.getUsersData= getUsersData
 // module.exports.basicCode= basicCode
