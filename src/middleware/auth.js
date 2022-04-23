@@ -2,7 +2,8 @@ const jwt = require("jsonwebtoken")
 
 
 const validateToken = async function(req,res,next){
-    let token = req.headers['x-Auth-Token'] || req.headers['x-auth-token']
+   try{
+        let token = req.headers['x-Auth-Token'] || req.headers['x-auth-token']
 
     if(!token){
         res.send({status:false,msg:"token must be present"})
@@ -11,6 +12,19 @@ const validateToken = async function(req,res,next){
     if(!decodedToken){
         res.send({status:false,msg:"token is invalid"})
     }
+
+    let userId = req.params.userId
+    let decoded = decodedToken.userId
+
+    if(userId != decoded) {
+          return res.status(404).send("INVALID REQUEST!!")
+    }
+    
+    }
+    catch (error){
+        return res.send({error})
+    }
+
 
     next()
 }

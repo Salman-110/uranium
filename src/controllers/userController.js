@@ -3,10 +3,15 @@ const userModel = require("../models/userModel");
 
 const createUser = async function (req,res) {
  
-  let data = req.body;
+  try{
+    let data = req.body;
   let savedData = await userModel.create(data);
   console.log(req.newAtribute);
-  res.send({ msg: savedData });
+  res.status(201).send({ msg: savedData });
+  }
+  catch(error){
+    return res.status(404).send({error})
+  }
 };
 
 const loginUser = async function (req, res) {
@@ -14,22 +19,22 @@ const loginUser = async function (req, res) {
   let password = req.body.password;
 
   let user = await userModel.findOne({ emailId: userName, password: password });
+  
+
   if (!user)
     return res.send({
       status: false,
       msg: "username or the password is not corerct",
     });
-
-  
-  let token = jwt.sign(
+ let token = jwt.sign(
     {
       userId: user._id.toString(),
       batch: "thorium",
       organisation: "FUnctionUp",
     },
-    "functionup-thorium"
+    "functionup-thorium" 
   );
- 
+  res.setHeader("x-Auth-token",token)
   res.send({ status: true, data: token });
 };
 
@@ -39,8 +44,6 @@ const getUserData = async function (req, res) {
 
   //If no token is present in the request header return error
   if (!token) return res.send({ status: false, msg: "token must be present" });
-  
-  
   let decodedToken = jwt.verify(token, "functionup-thorium");
   if (!decodedToken)
     return res.send({ status: false, msg: "token is invalid" });
@@ -53,23 +56,23 @@ const getUserData = async function (req, res) {
   res.send({ status: true, data: userDetails });
 };
 
+// -----------------------------------------------------------//
 const updateUser = async function (req, res) {
-
   let userId = req.params.userId;
   let user = await userModel.findById(userId);
   //Return an error if no user with the given id exists in the db
   if (!user) {
     return res.send("No such user exists");
   }
-
   let userData = req.body;
   let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, userData);
-  res.send({ status: updatedUser, data: updatedUser });
-
+  res.send({ status: updatedUser, data: updatedUser })
+  
 };
 
+// ------------------------------------------------------------------//
 const deleteUser = async function (req, res) {
-    let userId = req.params.userId;
+    let userId = req.params.userId
     let user = await userModel.findById(userId);
     if (!user) {
       return res.send("No such user exists");
@@ -83,6 +86,13 @@ const deleteUser = async function (req, res) {
     )
     res.send({ status: true, data: updatedUser });
   }
+// ----------------------------------------------------------------//
+
+  let updatePost = 
+
+
+  
+               
   
   module.exports={createUser,getUserData,updateUser,loginUser,deleteUser}
 

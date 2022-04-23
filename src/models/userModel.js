@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema( {
         default:false
     },
     age: Number,
+
+    post:String
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model('Salmanuser', userSchema)
